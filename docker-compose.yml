@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: usuario          # ← tu usuario de BD
+      POSTGRES_PASSWORD: contraseña   # ← tu contraseña de BD
+      POSTGRES_DB: midb               # ← nombre de tu base de datos
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@tudominio.com       # ← tu email de acceso
+      PGADMIN_DEFAULT_PASSWORD: tu_password_segura      # ← tu password de PgAdmin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
