@@ -1,5 +1,6 @@
 import streamlit as st
-from sqlalchemy import text, SQLAlchemyError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from .db import engine
 
 def talla_form():

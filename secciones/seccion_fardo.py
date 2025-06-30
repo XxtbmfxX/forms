@@ -1,5 +1,6 @@
 import streamlit as st
-from sqlalchemy import text, SQLAlchemyError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from .db import engine
 
 def fardo_form():
@@ -15,9 +16,15 @@ def fardo_form():
         estado = st.selectbox("Estado", ["recibido", "procesado", "agotado"])
         submitted = st.form_submit_button("Guardar Fardo")
         if submitted:
-            with engine.begin() as conn:
-                conn.execute(text("""
-                    INSERT INTO fardo (id_proveedor, costo_total, costo_flete, cantidad_prendas_inicial, cantidad_prendas_actual, fecha_compra, descripcion_fardo, estado)
-                    VALUES (:id_proveedor, :costo_total, :costo_flete, :cantidad_inicial, :cantidad_actual, :fecha_compra, :descripcion, :estado)
-                """), {"id_proveedor": id_proveedor, "costo_total": costo_total, "costo_flete": costo_flete, "cantidad_inicial": cantidad_inicial, "cantidad_actual": cantidad_actual, "fecha_compra": fecha_compra, "descripcion": descripcion, "estado": estado})
-            st.success("Fardo guardado correctamente")
+            if not id_proveedor or not costo_total or not cantidad_inicial or not fecha_compra:
+                st.warning("ID Proveedor, Costo Total, Cantidad Inicial y Fecha de Compra son obligatorios.")
+            else:
+                try:
+                    with engine.begin() as conn:
+                        conn.execute(text("""
+                            INSERT INTO fardo (id_proveedor, costo_total, costo_flete, cantidad_prendas_inicial, cantidad_prendas_actual, fecha_compra, descripcion_fardo, estado)
+                            VALUES (:id_proveedor, :costo_total, :costo_flete, :cantidad_inicial, :cantidad_actual, :fecha_compra, :descripcion, :estado)
+                        """), {"id_proveedor": id_proveedor, "costo_total": costo_total, "costo_flete": costo_flete, "cantidad_inicial": cantidad_inicial, "cantidad_actual": cantidad_actual, "fecha_compra": fecha_compra, "descripcion": descripcion, "estado": estado})
+                    st.success("Fardo guardado correctamente")
+                except SQLAlchemyError as e:
+                    st.error(f"Error al guardar fardo: {e}")

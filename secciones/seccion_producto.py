@@ -1,16 +1,17 @@
 import streamlit as st
-from sqlalchemy import text, SQLAlchemyError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from .db import engine
 
 def producto_form():
     st.header("Ingreso de Producto")
     with engine.connect() as conn:
-        fardos = conn.execute(text("SELECT id_fardo FROM fardo")).fetchall()
+        fardos = conn.execute(text("SELECT id_fardo, id_proveedor FROM fardo")).fetchall()
         calidades = conn.execute(text("SELECT id_calidad, calidad_estado FROM calidad")).fetchall()
         categorias = conn.execute(text("SELECT id_categoria, nombre_categoria FROM categoria")).fetchall()
         tallas = conn.execute(text("SELECT id_talla, nombre_talla FROM talla")).fetchall()
 
-    fardo_opt = {f"Fardo {f[0]}": f[0] for f in fardos} if fardos else {"Sin fardos": None}
+    fardo_opt = {f"Fardo {f[0]} (Proveedor {f[1]})": f[0] for f in fardos} if fardos else {"Sin fardos": None}
     calidad_opt = {c[1]: c[0] for c in calidades} if calidades else {"Sin calidades": None}
     categoria_opt = {c[1]: c[0] for c in categorias} if categorias else {"Sin categorías": None}
     talla_opt = {t[1]: t[0] for t in tallas} if tallas else {"Sin tallas": None}
@@ -33,30 +34,33 @@ def producto_form():
         genero = st.selectbox("Género", ["hombre", "mujer", "unisex", "niño"])
         submitted = st.form_submit_button("Guardar Producto")
         if submitted:
-            try:
-                with engine.begin() as conn:
-                    conn.execute(text("""
-                        INSERT INTO producto (id_fardo, id_calidad, id_categoria, id_talla, nombre, codigo_interno, descripcion_producto, calidad_producto,
-                        precio_costo, precio_original, precio_actual, estado, fecha_ingreso, color, genero)
-                        VALUES (:id_fardo, :id_calidad, :id_categoria, :id_talla, :nombre, :codigo, :descripcion, :calidad_prod,
-                        :precio_costo, :precio_original, :precio_actual, :estado, :fecha_ingreso, :color, :genero)
-                    """), {
-                        "id_fardo": fardo_opt[id_fardo],
-                        "id_calidad": calidad_opt.get(id_calidad),
-                        "id_categoria": categoria_opt[id_categoria],
-                        "id_talla": talla_opt[id_talla],
-                        "nombre": nombre,
-                        "codigo": codigo,
-                        "descripcion": descripcion,
-                        "calidad_prod": calidad_prod,
-                        "precio_costo": precio_costo,
-                        "precio_original": precio_original,
-                        "precio_actual": precio_actual,
-                        "estado": estado,
-                        "fecha_ingreso": fecha_ingreso,
-                        "color": color,
-                        "genero": genero
-                    })
-                st.success("Producto guardado correctamente")
-            except SQLAlchemyError as e:
-                st.error(f"Error al guardar producto: {e}")
+            if not nombre or not codigo or not descripcion or not precio_costo or not precio_original or not precio_actual or not fecha_ingreso:
+                st.warning("Todos los campos obligatorios deben estar completos.")
+            else:
+                try:
+                    with engine.begin() as conn:
+                        conn.execute(text("""
+                            INSERT INTO producto (id_fardo, id_calidad, id_categoria, id_talla, nombre, codigo_interno, descripcion_producto, calidad_producto,
+                            precio_costo, precio_original, precio_actual, estado, fecha_ingreso, color, genero)
+                            VALUES (:id_fardo, :id_calidad, :id_categoria, :id_talla, :nombre, :codigo, :descripcion, :calidad_prod,
+                            :precio_costo, :precio_original, :precio_actual, :estado, :fecha_ingreso, :color, :genero)
+                        """), {
+                            "id_fardo": fardo_opt[id_fardo],
+                            "id_calidad": calidad_opt.get(id_calidad),
+                            "id_categoria": categoria_opt[id_categoria],
+                            "id_talla": talla_opt[id_talla],
+                            "nombre": nombre,
+                            "codigo": codigo,
+                            "descripcion": descripcion,
+                            "calidad_prod": calidad_prod,
+                            "precio_costo": precio_costo,
+                            "precio_original": precio_original,
+                            "precio_actual": precio_actual,
+                            "estado": estado,
+                            "fecha_ingreso": fecha_ingreso,
+                            "color": color,
+                            "genero": genero
+                        })
+                    st.success("Producto guardado correctamente")
+                except SQLAlchemyError as e:
+                    st.error(f"Error al guardar producto: {e}")
