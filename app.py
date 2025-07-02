@@ -15,7 +15,7 @@ from secciones.seccion_talla import talla_form
 st.sidebar.title("Navegación")
 section = st.sidebar.radio(
     label="Seleccione una sección",
-    options=["Proveedor", "Fardo", "Producto", "Calidad", "Categoría", "Talla", "Consultas"],
+    options=["Proveedor", "Fardo", "Producto", "Categoría", "Talla", "Consultas"],
     label_visibility="collapsed"
 )
 
