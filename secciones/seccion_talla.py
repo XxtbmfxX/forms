@@ -11,12 +11,15 @@ def talla_form():
         orden_display = st.number_input("Orden de Display", min_value=0)
         submitted = st.form_submit_button("Guardar Talla")
         if submitted:
-            try:
-                with engine.begin() as conn:
-                    conn.execute(text("""
-                        INSERT INTO talla (nombre_talla, tipo_talla, orden_display)
-                        VALUES (:nombre_talla, :tipo_talla, :orden_display)
-                    """), {"nombre_talla": nombre_talla, "tipo_talla": tipo_talla, "orden_display": orden_display})
-                st.success("Talla guardada correctamente")
-            except SQLAlchemyError as e:
-                st.error(f"Error al guardar talla: {e}")
+            if not nombre_talla.strip():
+                st.error("El nombre de la talla no puede estar vacío.")
+            else:
+                try:
+                    with engine.begin() as conn:
+                        conn.execute(text("""
+                            INSERT INTO talla (nombre_talla, tipo_talla, orden_display)
+                            VALUES (:nombre_talla, :tipo_talla, :orden_display)
+                        """), {"nombre_talla": nombre_talla, "tipo_talla": tipo_talla, "orden_display": orden_display})
+                    st.success("Talla guardada correctamente")
+                except SQLAlchemyError as e:
+                    st.error(f"Error al guardar talla: {e}")
