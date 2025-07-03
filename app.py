@@ -10,13 +10,11 @@ from secciones.seccion_categoria import categoria_form
 from secciones.seccion_talla import talla_form
 
 
-
-
 st.sidebar.title("Navegación")
 section = st.sidebar.radio(
     label="Seleccione una sección",
-    options=["Proveedor", "Fardo", "Producto", "Categoría", "Talla", "Consultas"],
-    label_visibility="collapsed"
+    options=["Proveedor", "Fardo", "Categoría", "Talla", "Producto", "Consultas"],
+    label_visibility="collapsed",
 )
 
 
@@ -24,14 +22,15 @@ if section == "Proveedor":
     proveedor_form()
 elif section == "Fardo":
     fardo_form()
-elif section == "Producto":
-    producto_form()
 elif section == "Calidad":
     calidad_form()
 elif section == "Categoría":
     categoria_form()
 elif section == "Talla":
     talla_form()
+elif section == "Producto":
+    producto_form()
 elif section == "Consultas":
     from secciones.seccion_consultas import consultas_sql_form
+
     consultas_sql_form()
